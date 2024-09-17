@@ -1,0 +1,117 @@
+import dotenv from "dotenv";
+import pg from "pg";
+import express from 'express';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+dotenv.config();
+if (!process.env.DATABASE_URL) {
+  throw new Error("Required environment variable is missing: DATABASE_URL");
+}
+const db = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: false
+});
+
+const SECRET = process.env.SECRET || "secret string";
+
+async function hashPassword(password: string): Promise<string> {
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    return await bcrypt.hash(password, salt);
+}
+
+const app = express();
+app.use(express.json());
+
+const port = 3001;
+
+app.get('/api', (req, res) => {
+  res.send('Api server is running');
+});
+
+app.post("/api/user/register", async (req, res) => {
+    const { email, firstname, lastname, password } = req.body;
+    try {
+      if (!email) {
+        res.status(400).json({ error: "missing required parameter: email" });
+        return;
+      }
+      if (!firstname) {
+        res.status(400).json({ error: "*** missing required parameter: firstname" });
+        return;
+      }
+      if (!lastname) {
+        res.status(400).json({ error: "missing required parameter: lastname" });
+        return;
+      }
+      if (!password) {
+        res.status(400).json({ error: "missing required parameter: password" });
+        return;
+      }
+      const passwordHash = await hashPassword(password);
+      await db.query(
+        `
+      INSERT INTO users (email, firstname, lastname, password_hash)
+        VALUES ($1, $2, $3, $4)
+      `,
+        [email, firstname, lastname, passwordHash]
+      );
+      res.json({ sucess: true });
+    } catch (error: any) {
+      if (error?.code === "23505") {
+        // PostgreSQL unique constraint violation code
+        res.status(400).json({ error: "User already exists " + email });
+      } else {
+        res.status(500).json({ error: "internal server error "});
+      }
+    }
+});
+
+app.post("/api/user/login", async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      if (!email) {
+        res.status(400).json({ error: "missing required parameter: email" });
+        return;
+      }
+      if (!password) {
+        res.status(400).json({ error: "missing required parameter: password" });
+        return;
+      }
+      
+      const result = await db.query(
+        `
+      SELECT * from users WHERE email = ($1)
+      `,
+        [email]
+      );
+      if(result.rows.length > 0) {
+        const dbPasswordHash = result.rows[0].password_hash;
+        await bcrypt.compare(password, dbPasswordHash, (err, result) => {
+          if (result) {
+              // Passwords match, authentication successful
+              // create jwt token
+              const payload = {
+                email: email
+              }
+              const options = {expiresIn: '10h'};
+              const token = jwt.sign(payload, SECRET, options);
+              res.status(200).json({ success: true, token: token });
+              return;
+          } else {
+            res.status(401).json({ error: "invalid username or password " + email });
+          }
+        });
+      } else {
+        res.status(401).json({ error: "invalid username or password " + email });
+      }
+      
+    } catch (error: any) {
+        res.status(500).json({ error: "internal server error "});
+    }
+});
+
+app.listen(port, () => {
+  return console.log(`Express is listening at http://localhost:${port}`);
+});
