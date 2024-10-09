@@ -3,6 +3,7 @@ import pg from "pg";
 import express from 'express';
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 dotenv.config();
 if (!process.env.DATABASE_URL) {
@@ -23,6 +24,11 @@ async function hashPassword(password: string): Promise<string> {
 
 const app = express();
 app.use(express.json());
+
+const options = {
+  origin: 'http://localhost:5173',
+  }
+app.use(cors(options))
 
 const port = 3001;
 
