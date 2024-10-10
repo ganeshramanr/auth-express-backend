@@ -15,6 +15,9 @@ const db = new pg.Pool({
 });
 
 const SECRET = process.env.SECRET || "secret string";
+const PORT = process.env.PORT || 3001;
+const UI_URL = process.env.UI_URL || "http://localhost";
+const UI_PORT = process.env.UI_PORT || 5173;
 
 async function hashPassword(password: string): Promise<string> {
     const saltRounds = 10;
@@ -26,11 +29,9 @@ const app = express();
 app.use(express.json());
 
 const options = {
-  origin: 'http://localhost:5173',
+  origin: `${UI_URL}:${UI_PORT}`,
   }
 app.use(cors(options))
-
-const port = 3001;
 
 app.get('/api', (req, res) => {
   res.send('Api server is running');
@@ -118,6 +119,6 @@ app.post("/api/user/login", async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${port}`);
+app.listen(PORT, () => {
+  return console.log(`Express is listening at ${PORT}`);
 });
