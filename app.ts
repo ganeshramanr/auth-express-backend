@@ -41,19 +41,19 @@ app.post("/api/user/register", async (req, res) => {
     const { email, firstname, lastname, password } = req.body;
     try {
       if (!email) {
-        res.status(400).json({ error: "missing required parameter: email" });
+        res.status(400).json({ error: "Missing required parameter: email" });
         return;
       }
       if (!firstname) {
-        res.status(400).json({ error: "*** missing required parameter: firstname" });
+        res.status(400).json({ error: "Missing required parameter: firstname" });
         return;
       }
       if (!lastname) {
-        res.status(400).json({ error: "missing required parameter: lastname" });
+        res.status(400).json({ error: "Missing required parameter: lastname" });
         return;
       }
       if (!password) {
-        res.status(400).json({ error: "missing required parameter: password" });
+        res.status(400).json({ error: "Missing required parameter: password" });
         return;
       }
       const passwordHash = await hashPassword(password);
@@ -70,7 +70,7 @@ app.post("/api/user/register", async (req, res) => {
         // PostgreSQL unique constraint violation code
         res.status(400).json({ error: "User already exists " + email });
       } else {
-        res.status(500).json({ error: "internal server error "});
+        res.status(500).json({ error: "Internal server error "});
       }
     }
 });
@@ -79,11 +79,11 @@ app.post("/api/user/login", async (req, res) => {
     const { email, password } = req.body;
     try {
       if (!email) {
-        res.status(400).json({ error: "missing required parameter: email" });
+        res.status(400).json({ error: "Missing required parameter: email" });
         return;
       }
       if (!password) {
-        res.status(400).json({ error: "missing required parameter: password" });
+        res.status(400).json({ error: "Missing required parameter: password" });
         return;
       }
       
@@ -107,15 +107,15 @@ app.post("/api/user/login", async (req, res) => {
               res.status(200).json({ success: true, token: token });
               return;
           } else {
-            res.status(401).json({ error: "invalid username or password " + email });
+            res.status(401).json({ error: "Invalid username or password"});
           }
         });
       } else {
-        res.status(401).json({ error: "invalid username or password " + email });
+        res.status(401).json({ error: "Invalid username or password"});
       }
       
     } catch (error: any) {
-        res.status(500).json({ error: "internal server error "});
+        res.status(500).json({ error: "Internal server error"});
     }
 });
 
