@@ -15,7 +15,7 @@ const db = new pg.Pool({
 });
 
 const SECRET = process.env.SECRET || "secret string";
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 80;
 const UI_URL = process.env.UI_URL || "http://localhost";
 const UI_PORT = process.env.UI_PORT || 5173;
 
