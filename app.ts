@@ -29,7 +29,8 @@ const app = express();
 app.use(express.json());
 
 const options = {
-  origin: `${UI_URL}:${UI_PORT}`,
+  // origin: `${UI_URL}:${UI_PORT}`,
+  origin: "*"
   }
 app.use(cors(options))
 
