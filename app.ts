@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL) {
 }
 const db = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: false
+    ssl: true
 });
 
 const SECRET = process.env.SECRET || "secret string";
