@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL) {
 }
 const db = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: true
+    ssl: false
 });
 
 const SECRET = process.env.SECRET || "secret string";
@@ -38,7 +38,7 @@ app.get('/api', (req, res) => {
   res.send('Api server is running');
 });
 
-app.post("/api/user/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
     const { email, firstname, lastname, password } = req.body;
     try {
       if (!email) {
@@ -76,7 +76,7 @@ app.post("/api/user/register", async (req, res) => {
     }
 });
 
-app.post("/api/user/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
     try {
       if (!email) {
@@ -116,6 +116,7 @@ app.post("/api/user/login", async (req, res) => {
       }
       
     } catch (error: any) {
+        console.log(error);
         res.status(500).json({ error: "Internal server error"});
     }
 });
